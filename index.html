@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JalurCepat Animation Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#101322;color:#fff}
+header{padding:24px 18px;background:#191e35;border-bottom:1px solid #343b59}
+h1{font-size:25px;margin:0 0 8px;color:#a9b9ff}
+header p{color:#c4c9dc;font-size:14px;line-height:1.5}
+main{max-width:850px;margin:auto;padding:18px}
+.card{background:#1b2036;border:1px solid #343b59;border-radius:15px;padding:18px;margin-bottom:18px}
+label{display:block;font-weight:bold;margin:14px 0 8px}
+input,textarea,select{width:100%;padding:12px;border-radius:9px;border:1px solid #49516e;background:#101526;color:white;font-size:16px}
+textarea{min-height:150px;resize:vertical;line-height:1.5}
+button{padding:12px 15px;border:0;border-radius:9px;background:#7388ff;color:#101322;font-weight:bold;font-size:15px;margin:10px 5px 0 0}
+.secondary{background:#343b59;color:white}
+.scene{background:#111629;padding:14px;border-radius:10px;margin-top:12px;border:1px solid #343b59}
+.scene h3{color:#a9b9ff;margin-top:0}
+.scene p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+small{color:#b7bfd9}
+footer{text-align:center;padding:20px;color:#aeb5ce;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>🎬 JalurCepat Animation Studio</h1>
+<p>Studio kreatif untuk mengubah cerita menjadi rancangan adegan dan prompt video AI.</p>
+</header>
+<main>
+<section class="card">
+<h2>✨ Buat rancangan video</h2>
+<label for="judul">Judul video</label>
+<input id="judul" placeholder="Contoh: Petualangan di Hutan Ajaib">
+<label for="cerita">Masukkan cerita atau naskah</label>
+<textarea id="cerita" placeholder="Tempel cerita atau naskahmu di sini..."></textarea>
+<label for="gaya">Gaya visual</label>
+<select id="gaya">
+<option>Animasi 3D sinematik orisinal</option>
+<option>Kartun 2D</option>
+<option>Anime orisinal</option>
+<option>Dongeng anak penuh warna</option>
+<option>Dokumenter sinematik</option>
+<option>Animasi edukasi islami</option>
+</select>
+<label for="format">Format video</label>
+<select id="format">
+<option value="9:16">Vertikal 9:16 — Shorts, Reels, TikTok</option>
+<option value="16:9">Lanskap 16:9 — YouTube</option>
+<option value="1:1">Persegi 1:1</option>
+</select>
+<label for="durasi">Target durasi</label>
+<select id="durasi">
+<option value="30 detik">30 detik</option>
+<option value="1 menit">1 menit</option>
+<option value="3 menit">3 menit</option>
+<option value="5 menit">5 menit</option>
+<option value="10 menit">10 menit</option>
+<option value="20 menit">20 menit atau lebih</option>
+</select>
+<button onclick="buatAdegan()">Buat rancangan adegan</button>
+<button class="secondary" onclick="hapus()">Hapus isi</button>
+</section>
+<section class="card">
+<h2>📝 Hasil rancangan</h2>
+<p id="status">Masukkan cerita, lalu tekan tombol Buat rancangan adegan.</p>
+<div id="hasil"></div>
+<button id="unduh" class="secondary" hidden onclick="unduhHasil()">Unduh rancangan TXT</button>
+</section>
+</main>
+<footer>JalurCepat Animation Studio · Versi 0.1 · Dibuat untuk kreator Indonesia</footer>
+<script>
+let rancangan=[];
+function buatAdegan(){
+const judul=document.getElementById('judul').value.trim()||'Video Tanpa Judul';
+const cerita=document.getElementById('cerita').value.trim();
+const gaya=document.getElementById('gaya').value;
+const format=document.getElementById('format').value;
+const durasi=document.getElementById('durasi').value;
+if(!cerita){alert('Masukkan cerita terlebih dahulu.');return;}
+const bagian=cerita.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+const kalimat=[];
+bagian.forEach(b=>{
+const potong=b.match(/[^.!?]+[.!?]*|[^.!?]+$/g)||[b];
+potong.forEach(k=>{if(k.trim())kalimat.push(k.trim())});
+});
+const adegan=kalimat.length?kalimat:bagian;
+rancangan=[];
+const hasil=document.getElementById('hasil');
+hasil.innerHTML='';
+adegan.forEach((teks,i)=>{
+const prompt=`Buat video ${gaya}, format ${format}. Adegan ${i+1} dari ${adegan.length}. Cerita: "${teks}". Gunakan karakter orisinal yang konsisten, komposisi sinematik, gerakan alami, pencahayaan sesuai suasana, tanpa logo atau karakter berhak cipta. Judul: ${judul}.`;
+rancangan.push(`ADEGAN ${i+1}\nCerita: ${teks}\nPrompt: ${prompt}\n`);
+const div=document.createElement('div');
+div.className='scene';
+const h=document.createElement('h3');
+h.textContent='Adegan '+(i+1);
+const p=document.createElement('p');
+p.textContent='Cerita: '+teks+'\n\nPrompt AI:\n'+prompt;
+const btn=document.createElement('button');
+btn.textContent='Salin prompt';
+btn.onclick=()=>salin(prompt,btn);
+div.append(h,p,btn);
+hasil.appendChild(div);
+});
+document.getElementById('status').textContent=`Judul: ${judul} · ${rancangan.length} adegan · Durasi target: ${durasi}`;
+document.getElementById('unduh').hidden=false;
+}
+function salin(teks,tombol){
+if(navigator.clipboard&&navigator.clipboard.writeText){
+navigator.clipboard.writeText(teks).then(()=>tombol.textContent='Tersalin!').catch(()=>salinManual(teks,tombol));
+}else salinManual(teks,tombol);
+}
+function salinManual(teks,tombol){
+const area=document.createElement('textarea');
+area.value=teks;document.body.appendChild(area);area.select();
+try{document.execCommand('copy');tombol.textContent='Tersalin!';}
+catch(e){alert('Tekan lama teks prompt lalu pilih Salin.');}
+area.remove();
+}
+function unduhHasil(){
+const isi='JALURCEPAT ANIMATION STUDIO\n\n'+document.getElementById('status').textContent+'\n\n'+rancangan.join('\n');
+const blob=new Blob([isi],{type:'text/plain;charset=utf-8'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');a.href=url;a.download='rancangan-jalurcepat.txt';a.click();URL.revokeObjectURL(url);
+}
+function hapus(){
+document.getElementById('judul').value='';
+document.getElementById('cerita').value='';
+document.getElementById('hasil').innerHTML='';
+document.getElementById('status').textContent='Masukkan cerita, lalu tekan tombol Buat rancangan adegan.';
+document.getElementById('unduh').hidden=true;rancangan=[];
+}
+</script>
+</body>
+</html>
